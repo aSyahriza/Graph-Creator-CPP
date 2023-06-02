@@ -12,6 +12,7 @@ public:
   char* findShortest(char*, char*, int&);
   void print();
   bool connected(char*, char*);
+  bool inGraph(char* char1);
 
 
 private:

@@ -2,7 +2,7 @@
 #include <iostream>
 using namespace std;
 
-class hashTable {
+class Graph {
 public:
   void addVertex(char*);
   void addEdge(char*, char*, int);
@@ -11,6 +11,8 @@ public:
   char* search(char*);
   char* findShortest(char*, char*, int&);
   void print();
+  bool connected(char*, char*);
+  bool inGraph(char* char1);
 
 
 private:
