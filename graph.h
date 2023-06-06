@@ -1,5 +1,6 @@
 #include <map>
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 class Graph {
@@ -16,7 +17,7 @@ public:
 
 
 private:
-map<char*, map<char*,int>> map;
+map<char*, map<char*,int>> myMap;
 int distance;
 
 };
