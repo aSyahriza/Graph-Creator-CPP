@@ -1,5 +1,8 @@
 #include "graph.h"
 #include <map>
+#include <limits.h>
+#include <set>
+#include <stack>
 
 void Graph::addVertex(char* char1){
   myMap.insert(make_pair(char1, map<char*,int>()));
@@ -7,76 +10,134 @@ void Graph::addVertex(char* char1){
 }
 void Graph::addEdge(char* char1, char* char2, int distance){
   // Returns if one of the vertices isn't in the Graph 
-  cout << "EE" << endl;
-  if(inGraph(char1)==false||inGraph(char2)==false){
+  char1= inGraph(char1);
+  char2 = inGraph(char2);
+  if(char1==NULL||char2==NULL){
     cout << "Invalid input." << endl;
     return;
-
-
-
   }
 
-
-  //////////////////////////////////////////////////////////////////////////////////////
-
-  
-  cout << "Distance: " << distance << endl;
-
-  // Reason this doesn't work is because it's not an array. The key is not an iindex. 
-  // There can be multiple keys with the same value, and so really you are just 
-  // creating another key
-  // Goal is to insert using iterator
-  // Search up how to insert, and how to use make_pair
-  // https://www.geeksforgeeks.org/implementing-multidimensional-map-in-c/
-  /*
-  for(auto i : myMap){
-    if(strcmp(i.first,char1)){
-      
+  // Adds connection vertices map
+  for(auto &i : myMap){
+    if(strcmp(i.first,char1)==0){
+      i.second.insert(make_pair(char2,distance));
     }
-  }*/
-  myMap[char1][char2] = distance;
-  cout << myMap[char1][char2] << endl;
+  }
+  cout << "Edge has been added." << endl;
 }
 
-void Graph::removeVertex(char* char1){
-  // First delete char from myMap
-  myMap.erase(char1);
-
+void Graph::removeVertex(char* char1P){
+  if(inGraph(char1P)==NULL){
+    cout << "Invalid input!" << endl;
+    return;
+  }
+  char* char1 = inGraph(char1P);
+               
+  
   // Go through myMap and delete every vertex's connection with it
   for(auto i : myMap){
     if(connected(i.first,char1)){
       myMap[i.first].erase(char1);
     }
   }
+  
+ // Delete char from myMap
+  myMap.erase(char1);   
+  cout << "Edge has been deleted" << endl;
 }
-void Graph::removeEdge(char* char1, char* char2){
+void Graph::removeEdge(char* char1P, char* char2P){
+  char* char1 = inGraph(char1P);
+  char* char2 = inGraph(char2P);
   // Returns if one of the vertices isn't in the Graph 
   if(!connected(char1,char2)){
     cout << "Invalid input." << endl;
     return;
   }
   else{
+    cout << "Valid input." << endl;
     myMap[char1].erase(char2);  
+
   }
   
 }
-char* Graph::search(char* char1){
+
+void Graph::findShortest(char* char1, char* char2){
+  stack<char*> shortestSequence;
+  djikstra(char1,char2);
+  
+  char* current = inGraph(char2);
+  // If the shortest distance hasn't been changed, then vertex2 is 
+  // unconnected from vertex1
+  if(shortestDistanceMap[current] == INT_MAX){
+    cout << "No path exists." << endl;
+    return;
+  }
+  // Add vertices in shortest path to stack
+  while(current!=inGraph(char1)){
+    shortestSequence.push(current);
+    current = prevVertex[current];
+  }
+  // Repeatedly pop to print the stack in order.
+  shortestSequence.push(inGraph(char1));
+  shortestDistanceMap[inGraph(char2)];
+  while(!shortestSequence.empty()){
+    cout << shortestSequence.top() <<" ";
+    shortestSequence.pop();
+  }
+  cout << endl;
+  
 }
 
-char* Graph::findShortest(char* char1, char* char2, int &distance){
+void Graph::djikstra(char* char1P, char* char2P){
+  // Made with help from Daren Kostov
+  set<char*> unVisited;
+  // Initiliaze maps and set
+  for(auto i : myMap){
+    unVisited.insert(i.first);
+    shortestDistanceMap[i.first] = INT_MAX;
+    prevVertex[i.first];
+  }
+  // Go through each vertex, updating the adjacent vertices distance from the origin
+  char* current = inGraph(char1P);
+  shortestDistanceMap[current] = 0;
+  while(unVisited.empty()==false){
+    for(auto i : myMap[current]){
+      if(unVisited.find(i.first)!=unVisited.end()){
+        int totalDistance = shortestDistanceMap[current] + i.second;
+        if(totalDistance < shortestDistanceMap[i.first]){
+          shortestDistanceMap[i.first] = totalDistance;
+          prevVertex[i.first] = current;
+        }
+      }
+    }
 
+    // Update unvisited set
+    unVisited.erase(current);
+    int nextShortest = INT_MAX;
+    if(unVisited.empty()){
+      break;
+    }
+
+    // Find the next unvisited vertex
+    for(auto i : shortestDistanceMap){
+      if(unVisited.find(i.first)!=unVisited.end()){        
+        if(i.second <= nextShortest && i.second!=0){
+          nextShortest = i.second;
+          current = i.first;
+        }
+      }
+    }  
+  }
 }
   
 void Graph::print(){
-  // for each loop
   cout << "\t";
   for(auto i : myMap){
-    // cout << myMap[(*(myMap.begin())).first][i.first] << " ";
      cout << i.first << "\t";
   }
   cout << endl;
   for(auto i : myMap){
-   // cout << "EEE" << endl;
+   // Prints T if they are connected, F if not
     cout << i.first << "\t";
     for(auto j: myMap){
       if(connected(i.first,j.first)){
@@ -89,37 +150,26 @@ void Graph::print(){
     }
     cout << endl;
   }
-  /*
-  for (auto i = myMap.begin(); i != myMap.end(); i++){
-    cout <<  << endl;
-  }*/
 }
 
 bool Graph::connected(char* char1, char* char2){
-   for(auto i : myMap[char1]){
-     if(strcmp(i.first,char2)==0){
-       return true;
-     }
+  // Checks if vertices are connected
+  for(auto i : myMap[char1]){
+    if(strcmp(i.first,char2)==0){
+      return myMap[char1][char2]!=0;
+    }
   }
   return false;
 }
 
-bool Graph::inGraph(char* char1){
-  
+char* Graph::inGraph(char* char1){
+  // Returns the actual pointer for vertex
   for(auto i : myMap){
     if(strcmp(i.first,char1)==0){
-      return true;
+      return i.first;
     }
   }
-  return false;
-  /*
-  // if(myMap.find(char1)==myMap.end()){
-  if(myMap.count(char1)==0){
-    cout << char1 << endl;
-    return false;
-  }
-  else{
-    return true;
-  }
-  */
+  return NULL;
+
 }
+

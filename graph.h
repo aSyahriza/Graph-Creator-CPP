@@ -1,4 +1,5 @@
 #include <map>
+#include <unordered_map>
 #include <iostream>
 #include <cstring>
 using namespace std;
@@ -10,14 +11,19 @@ public:
   void removeVertex(char*);
   void removeEdge(char*, char*);
   char* search(char*);
-  char* findShortest(char*, char*, int&);
+  void djikstra(char*, char*);
+  void findShortest(char*,char*);
   void print();
   bool connected(char*, char*);
-  bool inGraph(char* char1);
+  char* inGraph(char* char1);
 
 
 private:
 map<char*, map<char*,int>> myMap;
+unordered_map<char*,int> shortestDistanceMap;
+unordered_map<char*,char*> prevVertex;
+
 int distance;
+
 
 };
